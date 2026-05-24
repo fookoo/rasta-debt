@@ -8,6 +8,9 @@ export default defineConfig({
       jsxImportSource: '@emotion/react',
     }),
   ],
+  build: {
+    outDir: 'docs'
+  },
   test: {
     globals: true,
     environment: 'happy-dom',
