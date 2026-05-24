@@ -74,7 +74,7 @@ export const mockDashboardData: DashboardData = {
       number: 9,
       dueDate: '2026-05-15',
       amount: { amount: 967, currency: 'PLN' },
-      status: 'pending',
+      status: 'overdue',
     },
     {
       id: 'inst-10',
