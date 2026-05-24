@@ -1,4 +1,5 @@
 import { useDashboard } from '../../hooks/useDashboard/useDashboard'
+import { BalanceSummary } from '../BalanceSummary/BalanceSummary'
 import { Card } from '../Card/Card'
 import { DebtorHeader } from '../DebtorHeader/DebtorHeader'
 import { InstallmentList } from '../InstallmentList/InstallmentList'
@@ -42,6 +43,10 @@ export const Dashboard = () => {
   return (
     <Page>
       <Stack gap="xl">
+        <BalanceSummary
+          amountFormatted={data.balance.amountFormatted}
+          tone={data.balance.tone}
+        />
         <DebtorHeader name={data.debtorName} />
         <LoanSummary
           borrowed={data.summary.borrowedFormatted}

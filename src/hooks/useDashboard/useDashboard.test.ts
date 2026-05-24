@@ -81,6 +81,84 @@ describe('useDashboard', () => {
     expect(result.current.data?.nextPayment?.amountFormatted).toContain('2')
   })
 
+  it('treats pending installments with a past due date as overdue', async () => {
+    const overduePending: DashboardData = {
+      ...sample,
+      loan: {
+        ...sample.loan,
+        nextPaymentDate: '2000-01-01',
+      },
+      installments: [
+        { ...sample.installments[0], id: 'paid', number: 1, dueDate: '1999-01-01' },
+        {
+          ...sample.installments[2],
+          id: 'late',
+          number: 2,
+          dueDate: '2000-01-01',
+          status: 'pending',
+        },
+        { ...sample.installments[2], id: 'future', number: 3, dueDate: '2999-01-01' },
+      ],
+    }
+    vi.spyOn(DashboardService, 'getData').mockResolvedValue(overduePending)
+
+    const { result } = renderHook(() => useDashboard())
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+    const late = result.current.data?.installments.find((installment) => installment.id === 'late')
+
+    expect(late?.status).toBe('overdue')
+    expect(late?.statusLabel).toBe('Zaległa')
+    expect(result.current.data?.nextPayment?.isOverdue).toBe(true)
+  })
+
+  it.each([
+    { paid: 2000, expectedAmount: 0, expectedTone: 'default' },
+    { paid: 2500, expectedAmount: -500, expectedTone: 'success' },
+    { paid: 1500, expectedAmount: 500, expectedTone: 'danger' },
+  ] as const)(
+    'calculates schedule balance for paid amount $paid',
+    async ({ paid, expectedAmount, expectedTone }) => {
+      const data: DashboardData = {
+        ...sample,
+        loan: {
+          ...sample.loan,
+          paid: { amount: paid, currency: 'PLN' },
+        },
+        installments: [
+          {
+            ...sample.installments[0],
+            id: 'due-1',
+            number: 1,
+            dueDate: '2000-01-01',
+            amount: { amount: 1000, currency: 'PLN' },
+          },
+          {
+            ...sample.installments[1],
+            id: 'due-2',
+            number: 2,
+            dueDate: '2000-02-01',
+            amount: { amount: 1000, currency: 'PLN' },
+          },
+          {
+            ...sample.installments[2],
+            id: 'future',
+            number: 3,
+            dueDate: '2999-01-01',
+            amount: { amount: 1000, currency: 'PLN' },
+          },
+        ],
+      }
+      vi.spyOn(DashboardService, 'getData').mockResolvedValue(data)
+
+      const { result } = renderHook(() => useDashboard())
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+      expect(result.current.data?.balance.amount).toBe(expectedAmount)
+      expect(result.current.data?.balance.tone).toBe(expectedTone)
+    },
+  )
+
   it('sorts payments newest first and installments by number', async () => {
     const multi: DashboardData = {
       ...sample,

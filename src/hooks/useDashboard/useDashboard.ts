@@ -22,6 +22,22 @@ const formatDate = (iso: string): string =>
     new Date(iso),
   )
 
+const formatSignedMoney = (money: Money): string =>
+  new Intl.NumberFormat(LOCALE, {
+    style: 'currency',
+    currency: money.currency,
+    maximumFractionDigits: 0,
+    signDisplay: 'exceptZero',
+  }).format(money.amount)
+
+const toLocalISODate = (date: Date): string => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
 const STATUS_LABEL: Record<InstallmentStatus, string> = {
   paid: 'Opłacona',
   pending: 'Oczekuje',
@@ -39,6 +55,17 @@ const daysBetween = (from: Date, to: Date): number => {
   return Math.round(ms / (1000 * 60 * 60 * 24))
 }
 
+const resolveInstallmentStatus = (
+  installment: Installment,
+  todayISO: string,
+): InstallmentStatus => {
+  if (installment.status === 'pending' && installment.dueDate < todayISO) {
+    return 'overdue'
+  }
+
+  return installment.status
+}
+
 const buildSummary = (data: DashboardData) => {
   const principal = data.loan.principal.amount
   const paid = data.loan.paid.amount
@@ -52,7 +79,32 @@ const buildSummary = (data: DashboardData) => {
   }
 }
 
-const buildNextPayment = (data: DashboardData) => {
+type BalanceTone = 'default' | 'success' | 'danger'
+
+const getBalanceTone = (amount: number): BalanceTone => {
+  if (amount > 0) return 'danger'
+  if (amount < 0) return 'success'
+
+  return 'default'
+}
+
+const buildBalance = (data: DashboardData, todayISO: string) => {
+  const scheduledAmount = data.installments
+    .filter((installment) => installment.dueDate < todayISO)
+    .reduce((total, installment) => total + installment.amount.amount, 0)
+  const amount = scheduledAmount - data.loan.paid.amount
+
+  return {
+    amount,
+    amountFormatted: formatSignedMoney({
+      amount,
+      currency: data.loan.paid.currency,
+    }),
+    tone: getBalanceTone(amount),
+  }
+}
+
+const buildNextPayment = (data: DashboardData, todayISO: string, now: Date) => {
   if (!data.loan.nextPaymentDate) return null
 
   const upcoming = [...data.installments]
@@ -61,24 +113,29 @@ const buildNextPayment = (data: DashboardData) => {
 
   if (!upcoming) return null
 
-  const daysUntil = daysBetween(new Date(), new Date(upcoming.dueDate))
+  const status = resolveInstallmentStatus(upcoming, todayISO)
+  const daysUntil = daysBetween(now, new Date(upcoming.dueDate))
 
   return {
     dateFormatted: formatDate(upcoming.dueDate),
     amountFormatted: formatMoney(upcoming.amount),
     daysUntil,
-    isOverdue: upcoming.status === 'overdue',
+    isOverdue: status === 'overdue',
   }
 }
 
-const buildInstallment = (installment: Installment) => ({
-  id: installment.id,
-  label: `Rata ${installment.number}`,
-  dueDateFormatted: formatDate(installment.dueDate),
-  amountFormatted: formatMoney(installment.amount),
-  status: installment.status,
-  statusLabel: STATUS_LABEL[installment.status],
-})
+const buildInstallment = (installment: Installment, todayISO: string) => {
+  const status = resolveInstallmentStatus(installment, todayISO)
+
+  return {
+    id: installment.id,
+    label: `Rata ${installment.number}`,
+    dueDateFormatted: formatDate(installment.dueDate),
+    amountFormatted: formatMoney(installment.amount),
+    status,
+    statusLabel: STATUS_LABEL[status],
+  }
+}
 
 const buildPayment = (payment: Payment) => ({
   id: payment.id,
@@ -90,19 +147,28 @@ const buildPayment = (payment: Payment) => ({
 
 export type DashboardViewModel = {
   debtorName: string
+  balance: ReturnType<typeof buildBalance>
   summary: ReturnType<typeof buildSummary>
   nextPayment: ReturnType<typeof buildNextPayment>
   installments: ReturnType<typeof buildInstallment>[]
   payments: ReturnType<typeof buildPayment>[]
 }
 
-const buildViewModel = (data: DashboardData): DashboardViewModel => ({
-  debtorName: data.debtor.fullName,
-  summary: buildSummary(data),
-  nextPayment: buildNextPayment(data),
-  installments: [...data.installments].sort((a, b) => a.number - b.number).map(buildInstallment),
-  payments: [...data.payments].sort((a, b) => b.date.localeCompare(a.date)).map(buildPayment),
-})
+const buildViewModel = (data: DashboardData): DashboardViewModel => {
+  const now = new Date()
+  const todayISO = toLocalISODate(now)
+
+  return {
+    debtorName: data.debtor.fullName,
+    balance: buildBalance(data, todayISO),
+    summary: buildSummary(data),
+    nextPayment: buildNextPayment(data, todayISO, now),
+    installments: [...data.installments]
+      .sort((a, b) => a.number - b.number)
+      .map((installment) => buildInstallment(installment, todayISO)),
+    payments: [...data.payments].sort((a, b) => b.date.localeCompare(a.date)).map(buildPayment),
+  }
+}
 
 type State =
   | { status: 'loading' }
