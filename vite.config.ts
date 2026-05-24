@@ -8,8 +8,9 @@ export default defineConfig({
       jsxImportSource: '@emotion/react',
     }),
   ],
+  base: 'rasta-debt',
   build: {
-    outDir: 'docs'
+    outDir: 'docs',
   },
   test: {
     globals: true,
