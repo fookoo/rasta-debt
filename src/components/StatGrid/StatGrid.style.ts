@@ -7,6 +7,10 @@ export const StatGridRoot = styled.div`
   gap: ${({ theme }) => theme.space.md};
 
   ${media.md} {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  ${media.lg} {
+    grid-template-columns: repeat(4, 1fr);
   }
 `

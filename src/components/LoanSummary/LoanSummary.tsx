@@ -11,10 +11,19 @@ type Props = {
   borrowed: string
   paid: string
   remaining: string
+  balance: string
+  balanceTone: 'default' | 'success' | 'danger'
   progressPercent: number
 }
 
-export const LoanSummary = ({ borrowed, paid, remaining, progressPercent }: Props) => (
+export const LoanSummary = ({
+  borrowed,
+  paid,
+  remaining,
+  balance,
+  balanceTone,
+  progressPercent,
+}: Props) => (
   <Card>
     <Stack gap="lg">
       <Heading level={2}>Podsumowanie pożyczki</Heading>
@@ -22,6 +31,7 @@ export const LoanSummary = ({ borrowed, paid, remaining, progressPercent }: Prop
         <StatTile label="Łączna kwota pożyczona" value={borrowed} />
         <StatTile label="Kwota spłacona" value={paid} tone="success" />
         <StatTile label="Pozostało do spłaty" value={remaining} tone="primary" />
+        <StatTile label="SALDO" value={balance} tone={balanceTone} />
       </StatGrid>
       <Stack gap="sm">
         <ProgressLabels>

@@ -112,52 +112,123 @@ describe('useDashboard', () => {
     expect(result.current.data?.nextPayment?.isOverdue).toBe(true)
   })
 
-  it.each([
-    { paid: 2000, expectedAmount: 0, expectedTone: 'default' },
-    { paid: 2500, expectedAmount: -500, expectedTone: 'success' },
-    { paid: 1500, expectedAmount: 500, expectedTone: 'danger' },
-  ] as const)(
-    'calculates schedule balance for paid amount $paid',
-    async ({ paid, expectedAmount, expectedTone }) => {
-      const data: DashboardData = {
-        ...sample,
-        loan: {
-          ...sample.loan,
-          paid: { amount: paid, currency: 'PLN' },
+  it('shows overdue installments as a negative balance', async () => {
+    const data: DashboardData = {
+      ...sample,
+      loan: {
+        ...sample.loan,
+        paid: { amount: 967, currency: 'PLN' },
+      },
+      installments: [
+        {
+          ...sample.installments[0],
+          id: 'paid',
+          number: 1,
+          amount: { amount: 967, currency: 'PLN' },
         },
-        installments: [
-          {
-            ...sample.installments[0],
-            id: 'due-1',
-            number: 1,
-            dueDate: '2000-01-01',
-            amount: { amount: 1000, currency: 'PLN' },
-          },
-          {
-            ...sample.installments[1],
-            id: 'due-2',
-            number: 2,
-            dueDate: '2000-02-01',
-            amount: { amount: 1000, currency: 'PLN' },
-          },
-          {
-            ...sample.installments[2],
-            id: 'future',
-            number: 3,
-            dueDate: '2999-01-01',
-            amount: { amount: 1000, currency: 'PLN' },
-          },
-        ],
-      }
-      vi.spyOn(DashboardService, 'getData').mockResolvedValue(data)
+        {
+          ...sample.installments[1],
+          id: 'late-1',
+          number: 2,
+          dueDate: '2000-01-01',
+          amount: { amount: 967, currency: 'PLN' },
+        },
+        {
+          ...sample.installments[1],
+          id: 'late-2',
+          number: 3,
+          dueDate: '2000-02-01',
+          amount: { amount: 967, currency: 'PLN' },
+        },
+        {
+          ...sample.installments[2],
+          id: 'late-3',
+          number: 4,
+          dueDate: '2000-03-01',
+          amount: { amount: 967, currency: 'PLN' },
+          status: 'pending',
+        },
+        {
+          ...sample.installments[2],
+          id: 'late-4',
+          number: 5,
+          dueDate: '2000-04-01',
+          amount: { amount: 967, currency: 'PLN' },
+          status: 'pending',
+        },
+      ],
+    }
+    vi.spyOn(DashboardService, 'getData').mockResolvedValue(data)
 
-      const { result } = renderHook(() => useDashboard())
-      await waitFor(() => expect(result.current.isLoading).toBe(false))
+    const { result } = renderHook(() => useDashboard())
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
 
-      expect(result.current.data?.balance.amount).toBe(expectedAmount)
-      expect(result.current.data?.balance.tone).toBe(expectedTone)
-    },
-  )
+    expect(result.current.data?.balance.amount).toBe(-3868)
+    expect(result.current.data?.balance.tone).toBe('danger')
+  })
+
+  it('shows overpayment as a positive green balance without a plus sign', async () => {
+    const data: DashboardData = {
+      ...sample,
+      loan: {
+        ...sample.loan,
+        paid: { amount: 2500, currency: 'PLN' },
+      },
+      installments: [
+        {
+          ...sample.installments[0],
+          id: 'paid',
+          number: 1,
+          amount: { amount: 2000, currency: 'PLN' },
+        },
+        {
+          ...sample.installments[2],
+          id: 'future',
+          number: 2,
+          dueDate: '2999-01-01',
+        },
+      ],
+    }
+    vi.spyOn(DashboardService, 'getData').mockResolvedValue(data)
+
+    const { result } = renderHook(() => useDashboard())
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+    expect(result.current.data?.balance.amount).toBe(500)
+    expect(result.current.data?.balance.amountFormatted).not.toContain('+')
+    expect(result.current.data?.balance.tone).toBe('success')
+  })
+
+  it('shows zero balance when there are no overdue installments or overpayment', async () => {
+    const data: DashboardData = {
+      ...sample,
+      loan: {
+        ...sample.loan,
+        paid: { amount: 2000, currency: 'PLN' },
+      },
+      installments: [
+        {
+          ...sample.installments[0],
+          id: 'paid',
+          number: 1,
+          amount: { amount: 2000, currency: 'PLN' },
+        },
+        {
+          ...sample.installments[2],
+          id: 'future',
+          number: 2,
+          dueDate: '2999-01-01',
+        },
+      ],
+    }
+    vi.spyOn(DashboardService, 'getData').mockResolvedValue(data)
+
+    const { result } = renderHook(() => useDashboard())
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+    expect(result.current.data?.balance.amount).toBe(0)
+    expect(result.current.data?.balance.tone).toBe('default')
+  })
 
   it('sorts payments newest first and installments by number', async () => {
     const multi: DashboardData = {

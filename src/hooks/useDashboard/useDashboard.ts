@@ -22,14 +22,6 @@ const formatDate = (iso: string): string =>
     new Date(iso),
   )
 
-const formatSignedMoney = (money: Money): string =>
-  new Intl.NumberFormat(LOCALE, {
-    style: 'currency',
-    currency: money.currency,
-    maximumFractionDigits: 0,
-    signDisplay: 'exceptZero',
-  }).format(money.amount)
-
 const toLocalISODate = (date: Date): string => {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -82,21 +74,28 @@ const buildSummary = (data: DashboardData) => {
 type BalanceTone = 'default' | 'success' | 'danger'
 
 const getBalanceTone = (amount: number): BalanceTone => {
-  if (amount > 0) return 'danger'
-  if (amount < 0) return 'success'
+  if (amount > 0) return 'success'
+  if (amount < 0) return 'danger'
 
   return 'default'
 }
 
 const buildBalance = (data: DashboardData, todayISO: string) => {
-  const scheduledAmount = data.installments
-    .filter((installment) => installment.dueDate < todayISO)
+  const overdueAmount = data.installments
+    .filter((installment) => resolveInstallmentStatus(installment, todayISO) === 'overdue')
     .reduce((total, installment) => total + installment.amount.amount, 0)
-  const amount = scheduledAmount - data.loan.paid.amount
+  const overpaidAmount = Math.max(
+    0,
+    data.loan.paid.amount -
+      data.installments
+        .filter((installment) => installment.status === 'paid')
+        .reduce((total, installment) => total + installment.amount.amount, 0),
+  )
+  const amount = overdueAmount > 0 ? -overdueAmount : overpaidAmount
 
   return {
     amount,
-    amountFormatted: formatSignedMoney({
+    amountFormatted: formatMoney({
       amount,
       currency: data.loan.paid.currency,
     }),
