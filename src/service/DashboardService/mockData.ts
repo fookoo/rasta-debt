@@ -214,6 +214,27 @@ export const mockDashboardData: DashboardData = {
       amount: { amount: 967, currency: 'PLN' },
       method: 'transfer',
       reference: 'inst-5',
+    },
+    {
+      id: 'pay-6',
+      date: '2026-06-03',
+      amount: { amount: 967, currency: 'PLN' },
+      method: 'transfer',
+      reference: 'inst-6',
+    },
+    {
+      id: 'pay-7',
+      date: '2026-06-03',
+      amount: { amount: 967, currency: 'PLN' },
+      method: 'transfer',
+      reference: 'inst-7',
+    },
+    {
+      id: 'pay-8',
+      date: '2026-06-05',
+      amount: { amount: 967, currency: 'PLN' },
+      method: 'transfer',
+      reference: 'inst-8',
     }
   ],
 }
