@@ -74,7 +74,7 @@ export const mockDashboardData: DashboardData = {
       number: 9,
       dueDate: '2026-05-15',
       amount: { amount: 967, currency: 'PLN' },
-      status: 'pending',
+      status: 'paid',
     },
     {
       id: 'inst-10',
@@ -235,6 +235,13 @@ export const mockDashboardData: DashboardData = {
       amount: { amount: 967, currency: 'PLN' },
       method: 'transfer',
       reference: 'inst-8',
+    },
+    {
+      id: 'pay-9',
+      date: '2026-06-18',
+      amount: { amount: 967, currency: 'PLN' },
+      method: 'transfer',
+      reference: 'inst-9',
     }
   ],
 }
