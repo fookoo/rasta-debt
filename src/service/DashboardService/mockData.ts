@@ -81,14 +81,14 @@ export const mockDashboardData: DashboardData = {
       number: 10,
       dueDate: '2026-06-15',
       amount: { amount: 967, currency: 'PLN' },
-      status: 'pending',
+      status: 'paid',
     },
     {
       id: 'inst-11',
       number: 11,
       dueDate: '2026-07-15',
       amount: { amount: 967, currency: 'PLN' },
-      status: 'pending',
+      status: 'paid',
     },
     {
       id: 'inst-12',
@@ -242,6 +242,20 @@ export const mockDashboardData: DashboardData = {
       amount: { amount: 967, currency: 'PLN' },
       method: 'transfer',
       reference: 'inst-9',
+    },
+    {
+      id: 'pay-10',
+      date: '2026-07-26',
+      amount: { amount: 967, currency: 'PLN' },
+      method: 'transfer',
+      reference: 'inst-10',
+    },
+    {
+      id: 'pay-11',
+      date: '2026-07-26',
+      amount: { amount: 967, currency: 'PLN' },
+      method: 'transfer',
+      reference: 'inst-11',
     }
   ],
 }
