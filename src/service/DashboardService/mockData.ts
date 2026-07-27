@@ -1,6 +1,22 @@
-import type { DashboardData } from './types'
+import type { LoanInput } from './types'
 
-export const mockDashboardData: DashboardData = {
+const installmentAmount = { amount: 967, currency: 'PLN' as const }
+
+const generateInstallmentPlan = (): LoanInput['installmentPlan'] => {
+  const plan: LoanInput['installmentPlan'] = []
+  for (let i = 0; i < 24; i++) {
+    const year = 2025 + Math.floor((8 + i) / 12)
+    const month = ((8 + i) % 12) + 1
+    const day = 15
+    plan.push({
+      dueDate: `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
+      amount: { ...installmentAmount },
+    })
+  }
+  return plan
+}
+
+export const mockLoanInput: LoanInput = {
   debtor: {
     id: 'debtor-001',
     fullName: 'Łukasz Izdebski',
@@ -8,170 +24,8 @@ export const mockDashboardData: DashboardData = {
   loan: {
     id: 'loan-2024-001',
     principal: { amount: 23502.22, currency: 'PLN' },
-    paid: { amount: 5107, currency: 'PLN' },
-    remaining: { amount: 18395.22, currency: 'PLN' },
-    nextPaymentDate: '2026-05-19',
   },
-  installments: [
-    {
-      id: 'inst-1',
-      number: 1,
-      dueDate: '2025-09-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'paid',
-    },
-    {
-      id: 'inst-2',
-      number: 2,
-      dueDate: '2025-10-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'paid',
-    },
-    {
-      id: 'inst-3',
-      number: 3,
-      dueDate: '2026-11-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'paid',
-    },
-    {
-      id: 'inst-4',
-      number: 4,
-      dueDate: '2025-12-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'paid',
-    },
-    {
-      id: 'inst-5',
-      number: 5,
-      dueDate: '2026-01-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'paid',
-    },
-    {
-      id: 'inst-6',
-      number: 6,
-      dueDate: '2026-02-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'paid',
-    },
-    {
-      id: 'inst-7',
-      number: 7,
-      dueDate: '2026-03-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'paid',
-    },
-    {
-      id: 'inst-8',
-      number: 8,
-      dueDate: '2026-04-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'paid',
-    },
-    {
-      id: 'inst-9',
-      number: 9,
-      dueDate: '2026-05-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'paid',
-    },
-    {
-      id: 'inst-10',
-      number: 10,
-      dueDate: '2026-06-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'paid',
-    },
-    {
-      id: 'inst-11',
-      number: 11,
-      dueDate: '2026-07-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'paid',
-    },
-    {
-      id: 'inst-12',
-      number: 12,
-      dueDate: '2026-08-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'pending',
-    },
-    {
-      id: 'inst-13',
-      number: 12,
-      dueDate: '2026-09-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'pending',
-    },
-    {
-      id: 'inst-14',
-      number: 13,
-      dueDate: '2026-10-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'pending',
-    },{
-      id: 'inst-15',
-      number: 14,
-      dueDate: '2026-11-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'pending',
-    },{
-      id: 'inst-16',
-      number: 15,
-      dueDate: '2026-12-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'pending',
-    },{
-      id: 'inst-17',
-      number: 16,
-      dueDate: '2027-01-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'pending',
-    },{
-      id: 'inst-18',
-      number: 16,
-      dueDate: '2027-02-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'pending',
-    },{
-      id: 'inst-19',
-      number: 16,
-      dueDate: '2027-03-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'pending',
-    },{
-      id: 'inst-20',
-      number: 19,
-      dueDate: '2027-04-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'pending',
-    },{
-      id: 'inst-21',
-      number: 20,
-      dueDate: '2027-05-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'pending',
-    },{
-      id: 'inst-22',
-      number: 21,
-      dueDate: '2027-06-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'pending',
-    },{
-      id: 'inst-23',
-      number: 22,
-      dueDate: '2027-07-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'pending',
-    },{
-      id: 'inst-24',
-      number: 23,
-      dueDate: '2027-08-15',
-      amount: { amount: 967, currency: 'PLN' },
-      status: 'pending',
-    },
-  ],
+  installmentPlan: generateInstallmentPlan(),
   payments: [
     {
       id: 'pay-1',
@@ -216,46 +70,46 @@ export const mockDashboardData: DashboardData = {
       reference: 'inst-5',
     },
     {
-      id: 'pay-6',
+      id: 'pay-7',
       date: '2026-06-03',
       amount: { amount: 967, currency: 'PLN' },
       method: 'transfer',
       reference: 'inst-6',
     },
     {
-      id: 'pay-7',
+      id: 'pay-8',
       date: '2026-06-03',
       amount: { amount: 967, currency: 'PLN' },
       method: 'transfer',
       reference: 'inst-7',
     },
     {
-      id: 'pay-8',
+      id: 'pay-9',
       date: '2026-06-05',
       amount: { amount: 967, currency: 'PLN' },
       method: 'transfer',
       reference: 'inst-8',
     },
     {
-      id: 'pay-9',
+      id: 'pay-10',
       date: '2026-06-18',
       amount: { amount: 967, currency: 'PLN' },
       method: 'transfer',
       reference: 'inst-9',
     },
     {
-      id: 'pay-10',
+      id: 'pay-11',
       date: '2026-07-26',
       amount: { amount: 967, currency: 'PLN' },
       method: 'transfer',
       reference: 'inst-10',
     },
     {
-      id: 'pay-11',
+      id: 'pay-12',
       date: '2026-07-26',
       amount: { amount: 967, currency: 'PLN' },
       method: 'transfer',
       reference: 'inst-11',
-    }
+    },
   ],
 }

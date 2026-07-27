@@ -23,6 +23,24 @@ export type Payment = {
   reference: string
 }
 
+export type LoanInstallmentPlanItem = {
+  dueDate: string
+  amount: Money
+}
+
+export type LoanInput = {
+  debtor: {
+    id: string
+    fullName: string
+  }
+  loan: {
+    id: string
+    principal: Money
+  }
+  installmentPlan: LoanInstallmentPlanItem[]
+  payments: Payment[]
+}
+
 export type DashboardData = {
   debtor: {
     id: string
